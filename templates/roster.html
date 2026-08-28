@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Roster</h1>
-<p><a href="/admin/dashboard">Dashboard</a> | <a href="/admin/tonight">Tonight</a></p>
+<p><a href="/admin/dashboard">Dashboard</a> | <a href="/admin/tonight">Tonight</a> | <a href="/admin/sessions">Past sessions</a></p>
 
 {% macro sort_link(key, label) %}
 <a href="/admin/roster?sort={{ key }}&dir={{ 'desc' if sort == key and dir == 'asc' else 'asc' }}">

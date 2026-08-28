@@ -2,7 +2,7 @@ import os
 from urllib.parse import quote
 
 import bcrypt
-from fastapi import Depends, FastAPI, Form, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -160,6 +160,30 @@ def admin_tonight(request: Request, _=Depends(require_admin), conn=Depends(db.ge
     attendance = db.tonight_attendance(conn)
     return templates.TemplateResponse(
         request, "tonight.html", {"attendance": attendance, "app_env": APP_ENV}
+    )
+
+
+@app.get("/admin/sessions")
+def admin_sessions(request: Request, _=Depends(require_admin), conn=Depends(db.get_db)):
+    sessions = db.list_sessions(conn)
+    return templates.TemplateResponse(
+        request, "sessions.html", {"sessions": sessions, "app_env": APP_ENV}
+    )
+
+
+@app.get("/admin/sessions/{session_id}")
+def admin_session_detail(
+    request: Request, session_id: int, _=Depends(require_admin), conn=Depends(db.get_db)
+):
+    session = db.get_session(conn, session_id)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    attendance = db.session_attendance(conn, session_id)
+    return templates.TemplateResponse(
+        request,
+        "session_detail.html",
+        {"session": session, "attendance": attendance, "app_env": APP_ENV},
     )
 
 

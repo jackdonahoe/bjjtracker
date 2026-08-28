@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Past Sessions</h1>
+<p><a href="/admin/dashboard">Dashboard</a> | <a href="/admin/tonight">Tonight</a> | <a href="/admin/roster">Roster</a></p>
+
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Attendance</th>
+    </tr>
+    {% for session in sessions %}
+    <tr>
+        <td><a href="/admin/sessions/{{ session.id }}">{{ session.held_at.strftime("%b %-d, %Y") }}</a></td>
+        <td>{{ session.attendance }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

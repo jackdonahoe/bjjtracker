@@ -68,7 +68,7 @@ def gone_quiet(conn):
 def tonight_attendance(conn):
     return conn.execute(
         """
-        SELECT p.full_name, c.checked_in
+        SELECT p.full_name, p.email, c.checked_in
         FROM check_ins c
         JOIN people p ON p.id = c.person_id
         JOIN sessions s ON s.id = c.session_id
@@ -76,6 +76,38 @@ def tonight_attendance(conn):
               (now() AT TIME ZONE 'America/New_York')::date
         ORDER BY p.full_name ASC
         """
+    ).fetchall()
+
+
+def list_sessions(conn):
+    return conn.execute(
+        """
+        SELECT s.id, s.held_at, COUNT(c.id) AS attendance
+        FROM sessions s
+        LEFT JOIN check_ins c ON c.session_id = s.id
+        GROUP BY s.id
+        ORDER BY s.held_at DESC
+        """
+    ).fetchall()
+
+
+def get_session(conn, session_id):
+    return conn.execute(
+        "SELECT id, held_at FROM sessions WHERE id = %(id)s",
+        {"id": session_id},
+    ).fetchone()
+
+
+def session_attendance(conn, session_id):
+    return conn.execute(
+        """
+        SELECT p.full_name, p.email
+        FROM check_ins c
+        JOIN people p ON p.id = c.person_id
+        WHERE c.session_id = %(session_id)s
+        ORDER BY p.full_name ASC
+        """,
+        {"session_id": session_id},
     ).fetchall()
 
 

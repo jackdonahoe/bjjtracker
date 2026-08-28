@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Tonight's Attendance</h1>
-<p><a href="/admin/dashboard">Dashboard</a> | <a href="/admin/sessions">Past sessions</a> | <a href="/admin/roster">Roster</a></p>
+<h1>{{ session.held_at.strftime("%b %-d, %Y") }}</h1>
+<p><a href="/admin/sessions">All sessions</a></p>
 
 <table>
     <tr>
@@ -16,6 +16,6 @@
     {% endfor %}
 </table>
 {% if not attendance %}
-<p>Nobody's checked in tonight yet.</p>
+<p>Nobody checked in this session.</p>
 {% endif %}
 {% endblock %}
