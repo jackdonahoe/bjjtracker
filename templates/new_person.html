@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>New here?</h1>
+<p>Looks like we don't have you on the roster yet.</p>
+
+<form method="post" action="/new">
+    <label>
+        Name
+        <input type="text" name="full_name" value="{{ name }}" required>
+    </label>
+
+    <label>
+        Email
+        <input type="email" name="email">
+    </label>
+
+    <label>
+        How did you hear about the club?
+        <select name="source" required>
+            {% for value, label in sources %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <button type="submit">Check In</button>
+</form>
+{% endblock %}

@@ -61,3 +61,18 @@ def check_in_person(conn, person_id, session_id):
         {"person_id": person_id, "session_id": session_id},
     ).fetchone()
     return row["id"] if row else None
+
+
+def create_person_and_check_in(conn, full_name, email, source):
+    with conn.transaction():
+        person = conn.execute(
+            """
+            INSERT INTO people (full_name, email, source)
+            VALUES (%(full_name)s, %(email)s, %(source)s)
+            RETURNING id, full_name
+            """,
+            {"full_name": full_name, "email": email or None, "source": source},
+        ).fetchone()
+        session_id = get_or_create_todays_session(conn)
+        check_in_person(conn, person["id"], session_id)
+    return person
