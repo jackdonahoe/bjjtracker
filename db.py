@@ -56,7 +56,7 @@ def gone_quiet(conn):
     return conn.execute(
         """
         SELECT p.id, p.full_name, p.email,
-               MAX(c.checked_in) AT TIME ZONE 'America/New_York' AS last_seen
+               MAX(c.checked_in) AT TIME ZONE 'America/Chicago' AS last_seen
         FROM people p JOIN check_ins c ON c.person_id = p.id
         WHERE p.merged_into IS NULL
         GROUP BY p.id, p.full_name, p.email
@@ -73,8 +73,8 @@ def tonight_attendance(conn):
         FROM check_ins c
         JOIN people p ON p.id = c.person_id
         JOIN sessions s ON s.id = c.session_id
-        WHERE (s.held_at AT TIME ZONE 'America/New_York')::date =
-              (now() AT TIME ZONE 'America/New_York')::date
+        WHERE (s.held_at AT TIME ZONE 'America/Chicago')::date =
+              (now() AT TIME ZONE 'America/Chicago')::date
         ORDER BY p.full_name ASC
         """
     ).fetchall()
@@ -83,7 +83,7 @@ def tonight_attendance(conn):
 def list_sessions(conn):
     return conn.execute(
         """
-        SELECT s.id, s.held_at AT TIME ZONE 'America/New_York' AS held_at,
+        SELECT s.id, s.held_at AT TIME ZONE 'America/Chicago' AS held_at,
                COUNT(c.id) AS attendance
         FROM sessions s
         LEFT JOIN check_ins c ON c.session_id = s.id
@@ -95,7 +95,7 @@ def list_sessions(conn):
 
 def get_session(conn, session_id):
     return conn.execute(
-        "SELECT id, held_at AT TIME ZONE 'America/New_York' AS held_at FROM sessions WHERE id = %(id)s",
+        "SELECT id, held_at AT TIME ZONE 'America/Chicago' AS held_at FROM sessions WHERE id = %(id)s",
         {"id": session_id},
     ).fetchone()
 
@@ -130,7 +130,7 @@ def list_roster(conn, sort, direction):
     # only work for values, not column names or ASC/DESC keywords.
     query = f"""
         SELECT p.id, p.full_name, p.email, p.source,
-               p.first_seen AT TIME ZONE 'America/New_York' AS first_seen,
+               p.first_seen AT TIME ZONE 'America/Chicago' AS first_seen,
                COUNT(c.id) AS checkins
         FROM people p
         LEFT JOIN check_ins c ON c.person_id = p.id
@@ -159,7 +159,7 @@ def get_or_create_todays_session(conn):
     row = conn.execute(
         """
         INSERT INTO sessions (held_at) VALUES (now())
-        ON CONFLICT (((held_at at time zone 'America/New_York')::date))
+        ON CONFLICT (((held_at at time zone 'America/Chicago')::date))
         DO UPDATE SET held_at = sessions.held_at
         RETURNING id
         """

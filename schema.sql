@@ -38,4 +38,4 @@ create index on check_ins (session_id);
 -- Without this, a practice held 8-10pm Eastern would roll into the next
 -- UTC day partway through and get split across two "sessions".
 create unique index sessions_one_per_day
-  on sessions (((held_at at time zone 'America/New_York')::date));
+on sessions (((held_at at time zone 'America/Chicago')::date));
