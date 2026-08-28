@@ -1,6 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Dashboard</h1>
-<p>You're logged in. Retention funnel and gone-quiet list go here next.</p>
-<p><a href="/admin/logout">Log out</a></p>
+<p><a href="/admin/logout">Log out</a> | <a href="/admin/tonight">Tonight's attendance</a></p>
+
+<h2>Retention funnel</h2>
+<table>
+    <tr>
+        <th>Source</th>
+        <th>Times checked in</th>
+        <th>People</th>
+    </tr>
+    {% for row in funnel %}
+    <tr>
+        <td>{{ row.source }}</td>
+        <td>{{ row.bucket }}</td>
+        <td>{{ row.people }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h2>Gone quiet (no check-in in 21+ days)</h2>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Last seen</th>
+    </tr>
+    {% for person in quiet %}
+    <tr>
+        <td>{{ person.full_name }}</td>
+        <td>{{ person.email or "—" }}</td>
+        <td>{{ person.last_seen.strftime("%b %-d, %Y") }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% if not quiet %}
+<p>Nobody's gone quiet right now.</p>
+{% endif %}
 {% endblock %}

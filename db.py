@@ -32,6 +32,39 @@ def search_people(conn, q):
     ).fetchall()
 
 
+def retention_funnel(conn):
+    return conn.execute(
+        """
+        WITH counts AS (
+            SELECT p.id, p.source, COUNT(c.id) AS n
+            FROM people p JOIN check_ins c ON c.person_id = p.id
+            WHERE p.merged_into IS NULL
+            GROUP BY p.id, p.source
+        ), bucketed AS (
+            SELECT source, CASE WHEN n >= 4 THEN '4+' ELSE n::text END AS bucket, COUNT(*) AS people
+            FROM counts
+            GROUP BY source, bucket
+        )
+        SELECT source, bucket, people
+        FROM bucketed
+        ORDER BY source, CASE WHEN bucket = '4+' THEN 4 ELSE bucket::int END
+        """
+    ).fetchall()
+
+
+def gone_quiet(conn):
+    return conn.execute(
+        """
+        SELECT p.id, p.full_name, p.email, MAX(c.checked_in) AS last_seen
+        FROM people p JOIN check_ins c ON c.person_id = p.id
+        WHERE p.merged_into IS NULL
+        GROUP BY p.id, p.full_name, p.email
+        HAVING MAX(c.checked_in) < now() - interval '21 days'
+        ORDER BY last_seen ASC
+        """
+    ).fetchall()
+
+
 def get_admin_by_email(conn, email):
     return conn.execute(
         "SELECT id, email, password_hash FROM admins WHERE email = %(email)s",

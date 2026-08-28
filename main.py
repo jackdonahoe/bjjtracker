@@ -147,5 +147,9 @@ def admin_logout(request: Request):
 
 
 @app.get("/admin/dashboard")
-def admin_dashboard(request: Request, _=Depends(require_admin)):
-    return templates.TemplateResponse(request, "dashboard.html", {"app_env": APP_ENV})
+def admin_dashboard(request: Request, _=Depends(require_admin), conn=Depends(db.get_db)):
+    funnel = db.retention_funnel(conn)
+    quiet = db.gone_quiet(conn)
+    return templates.TemplateResponse(
+        request, "dashboard.html", {"funnel": funnel, "quiet": quiet, "app_env": APP_ENV}
+    )
