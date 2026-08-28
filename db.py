@@ -18,3 +18,15 @@ def list_people(conn):
     return conn.execute(
         "SELECT id, full_name FROM people WHERE merged_into IS NULL ORDER BY full_name"
     ).fetchall()
+
+
+def search_people(conn, q):
+    return conn.execute(
+        """
+        SELECT id, full_name FROM people
+        WHERE merged_into IS NULL AND word_similarity(%(q)s, full_name) > 0.3
+        ORDER BY word_similarity(%(q)s, full_name) DESC
+        LIMIT 8
+        """,
+        {"q": q},
+    ).fetchall()

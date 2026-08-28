@@ -2,12 +2,12 @@
 {% block content %}
 <h1>Check In</h1>
 
-<p>(Autocomplete search box goes here in the next increment.)</p>
+<form method="post" action="/checkin">
+    <input type="text" id="name-input" autocomplete="off" placeholder="Type your name">
+    <input type="hidden" id="person-id" name="person_id">
+    <ul id="suggestions"></ul>
+    <button type="submit">Check In</button>
+</form>
 
-<h2>Current roster</h2>
-<ul>
-    {% for person in people %}
-    <li>{{ person.full_name }}</li>
-    {% endfor %}
-</ul>
+<script src="/static/checkin.js"></script>
 {% endblock %}
