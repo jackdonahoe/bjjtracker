@@ -4,10 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>UWF BJJ Club Check-In</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     {% if app_env == "demo" %}
-    <p><strong>DEMO — this data is fake</strong></p>
+    <p class="demo-banner">DEMO — this data is fake</p>
     {% endif %}
     {% block content %}{% endblock %}
 </body>
