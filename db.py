@@ -55,7 +55,8 @@ def retention_funnel(conn):
 def gone_quiet(conn):
     return conn.execute(
         """
-        SELECT p.id, p.full_name, p.email, MAX(c.checked_in) AS last_seen
+        SELECT p.id, p.full_name, p.email,
+               MAX(c.checked_in) AT TIME ZONE 'America/New_York' AS last_seen
         FROM people p JOIN check_ins c ON c.person_id = p.id
         WHERE p.merged_into IS NULL
         GROUP BY p.id, p.full_name, p.email
@@ -82,7 +83,8 @@ def tonight_attendance(conn):
 def list_sessions(conn):
     return conn.execute(
         """
-        SELECT s.id, s.held_at, COUNT(c.id) AS attendance
+        SELECT s.id, s.held_at AT TIME ZONE 'America/New_York' AS held_at,
+               COUNT(c.id) AS attendance
         FROM sessions s
         LEFT JOIN check_ins c ON c.session_id = s.id
         GROUP BY s.id
@@ -93,7 +95,7 @@ def list_sessions(conn):
 
 def get_session(conn, session_id):
     return conn.execute(
-        "SELECT id, held_at FROM sessions WHERE id = %(id)s",
+        "SELECT id, held_at AT TIME ZONE 'America/New_York' AS held_at FROM sessions WHERE id = %(id)s",
         {"id": session_id},
     ).fetchone()
 
@@ -127,7 +129,9 @@ def list_roster(conn, sort, direction):
     # input, so it's safe to interpolate them - psycopg's %s placeholders
     # only work for values, not column names or ASC/DESC keywords.
     query = f"""
-        SELECT p.id, p.full_name, p.email, p.source, p.first_seen, COUNT(c.id) AS checkins
+        SELECT p.id, p.full_name, p.email, p.source,
+               p.first_seen AT TIME ZONE 'America/New_York' AS first_seen,
+               COUNT(c.id) AS checkins
         FROM people p
         LEFT JOIN check_ins c ON c.person_id = p.id
         WHERE p.merged_into IS NULL
