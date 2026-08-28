@@ -153,3 +153,11 @@ def admin_dashboard(request: Request, _=Depends(require_admin), conn=Depends(db.
     return templates.TemplateResponse(
         request, "dashboard.html", {"funnel": funnel, "quiet": quiet, "app_env": APP_ENV}
     )
+
+
+@app.get("/admin/tonight")
+def admin_tonight(request: Request, _=Depends(require_admin), conn=Depends(db.get_db)):
+    attendance = db.tonight_attendance(conn)
+    return templates.TemplateResponse(
+        request, "tonight.html", {"attendance": attendance, "app_env": APP_ENV}
+    )

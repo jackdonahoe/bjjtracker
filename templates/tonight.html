@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Tonight's Attendance</h1>
+<p><a href="/admin/dashboard">Back to dashboard</a></p>
+
+<ul>
+    {% for row in attendance %}
+    <li>{{ row.full_name }}</li>
+    {% endfor %}
+</ul>
+{% if not attendance %}
+<p>Nobody's checked in tonight yet.</p>
+{% endif %}
+{% endblock %}

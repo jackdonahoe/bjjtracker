@@ -65,6 +65,20 @@ def gone_quiet(conn):
     ).fetchall()
 
 
+def tonight_attendance(conn):
+    return conn.execute(
+        """
+        SELECT p.full_name, c.checked_in
+        FROM check_ins c
+        JOIN people p ON p.id = c.person_id
+        JOIN sessions s ON s.id = c.session_id
+        WHERE (s.held_at AT TIME ZONE 'America/New_York')::date =
+              (now() AT TIME ZONE 'America/New_York')::date
+        ORDER BY p.full_name ASC
+        """
+    ).fetchall()
+
+
 def get_admin_by_email(conn, email):
     return conn.execute(
         "SELECT id, email, password_hash FROM admins WHERE email = %(email)s",
