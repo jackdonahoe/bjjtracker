@@ -161,3 +161,17 @@ def admin_tonight(request: Request, _=Depends(require_admin), conn=Depends(db.ge
     return templates.TemplateResponse(
         request, "tonight.html", {"attendance": attendance, "app_env": APP_ENV}
     )
+
+
+@app.get("/admin/roster")
+def admin_roster(
+    request: Request,
+    sort: str = "name",
+    dir: str = "asc",
+    _=Depends(require_admin),
+    conn=Depends(db.get_db),
+):
+    roster = db.list_roster(conn, sort, dir)
+    return templates.TemplateResponse(
+        request, "roster.html", {"roster": roster, "sort": sort, "dir": dir, "app_env": APP_ENV}
+    )

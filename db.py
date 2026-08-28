@@ -79,6 +79,32 @@ def tonight_attendance(conn):
     ).fetchall()
 
 
+ROSTER_SORT_COLUMNS = {
+    "name": "full_name",
+    "email": "email",
+    "source": "source",
+    "first_seen": "first_seen",
+    "checkins": "checkins",
+}
+
+
+def list_roster(conn, sort, direction):
+    column = ROSTER_SORT_COLUMNS.get(sort, "full_name")
+    direction = "desc" if direction == "desc" else "asc"
+    # column/direction come from a fixed allowlist above, never from raw
+    # input, so it's safe to interpolate them - psycopg's %s placeholders
+    # only work for values, not column names or ASC/DESC keywords.
+    query = f"""
+        SELECT p.id, p.full_name, p.email, p.source, p.first_seen, COUNT(c.id) AS checkins
+        FROM people p
+        LEFT JOIN check_ins c ON c.person_id = p.id
+        WHERE p.merged_into IS NULL
+        GROUP BY p.id
+        ORDER BY {column} {direction}
+    """
+    return conn.execute(query).fetchall()
+
+
 def get_admin_by_email(conn, email):
     return conn.execute(
         "SELECT id, email, password_hash FROM admins WHERE email = %(email)s",

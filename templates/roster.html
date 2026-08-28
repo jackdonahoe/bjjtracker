@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Roster</h1>
+<p><a href="/admin/dashboard">Dashboard</a> | <a href="/admin/tonight">Tonight</a></p>
+
+{% macro sort_link(key, label) %}
+<a href="/admin/roster?sort={{ key }}&dir={{ 'desc' if sort == key and dir == 'asc' else 'asc' }}">
+    {{ label }}{% if sort == key %} {{ '▲' if dir == 'asc' else '▼' }}{% endif %}
+</a>
+{% endmacro %}
+
+<table>
+    <tr>
+        <th>{{ sort_link('name', 'Name') }}</th>
+        <th>{{ sort_link('email', 'Email') }}</th>
+        <th>{{ sort_link('source', 'Source') }}</th>
+        <th>{{ sort_link('first_seen', 'First seen') }}</th>
+        <th>{{ sort_link('checkins', 'Check-ins') }}</th>
+    </tr>
+    {% for person in roster %}
+    <tr>
+        <td>{{ person.full_name }}</td>
+        <td>{{ person.email or "—" }}</td>
+        <td>{{ person.source }}</td>
+        <td>{{ person.first_seen.strftime("%b %-d, %Y") }}</td>
+        <td>{{ person.checkins }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
