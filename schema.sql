@@ -32,3 +32,10 @@ create table admins (
 
 create index on check_ins (person_id);
 create index on check_ins (session_id);
+
+-- One session per calendar day, in the club's local timezone (not UTC,
+-- which is what Postgres would use by default on a server like Railway).
+-- Without this, a practice held 8-10pm Eastern would roll into the next
+-- UTC day partway through and get split across two "sessions".
+create unique index sessions_one_per_day
+  on sessions (((held_at at time zone 'America/New_York')::date));
