@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UWF BJJ Club Check-In</title>
+</head>
+<body>
+    {% if app_env == "demo" %}
+    <p><strong>DEMO — this data is fake</strong></p>
+    {% endif %}
+    {% block content %}{% endblock %}
+</body>
+</html>
