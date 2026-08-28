@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+{% if already %}
+<h1>You're already checked in tonight, {{ name }}!</h1>
+{% else %}
+<h1>You're checked in, {{ name }}!</h1>
+{% endif %}
+<p><a href="/">Back</a></p>
+{% endblock %}
