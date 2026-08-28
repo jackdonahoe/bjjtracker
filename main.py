@@ -1,10 +1,12 @@
 import os
 from urllib.parse import quote
 
+import bcrypt
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 
 import db
 
@@ -12,6 +14,26 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 APP_ENV = os.environ.get("APP_ENV", "development")
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.environ["SECRET_KEY"],
+    https_only=APP_ENV != "development",
+)
+
+
+class NotAuthenticated(Exception):
+    pass
+
+
+@app.exception_handler(NotAuthenticated)
+def redirect_to_login(request: Request, exc: NotAuthenticated):
+    return RedirectResponse("/admin/login", status_code=303)
+
+
+def require_admin(request: Request):
+    if not request.session.get("admin_id"):
+        raise NotAuthenticated()
 
 SOURCES = [
     ("friend", "Friend or teammate"),
@@ -88,3 +110,42 @@ def new_person(
     return RedirectResponse(
         f"/checked-in?name={quote(person['full_name'])}&already=False", status_code=303
     )
+
+
+@app.get("/admin/login")
+def admin_login_page(request: Request):
+    return templates.TemplateResponse(
+        request, "admin_login.html", {"app_env": APP_ENV, "error": None}
+    )
+
+
+@app.post("/admin/login")
+def admin_login(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    conn=Depends(db.get_db),
+):
+    admin = db.get_admin_by_email(conn, email)
+    valid = admin and bcrypt.checkpw(password.encode(), admin["password_hash"].encode())
+    if not valid:
+        return templates.TemplateResponse(
+            request,
+            "admin_login.html",
+            {"app_env": APP_ENV, "error": "Wrong email or password"},
+            status_code=401,
+        )
+
+    request.session["admin_id"] = admin["id"]
+    return RedirectResponse("/admin/dashboard", status_code=303)
+
+
+@app.get("/admin/logout")
+def admin_logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/admin/login", status_code=303)
+
+
+@app.get("/admin/dashboard")
+def admin_dashboard(request: Request, _=Depends(require_admin)):
+    return templates.TemplateResponse(request, "dashboard.html", {"app_env": APP_ENV})

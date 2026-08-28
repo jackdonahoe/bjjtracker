@@ -32,6 +32,13 @@ def search_people(conn, q):
     ).fetchall()
 
 
+def get_admin_by_email(conn, email):
+    return conn.execute(
+        "SELECT id, email, password_hash FROM admins WHERE email = %(email)s",
+        {"email": email},
+    ).fetchone()
+
+
 def get_person(conn, person_id):
     return conn.execute(
         "SELECT id, full_name FROM people WHERE id = %(id)s",
